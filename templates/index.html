@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kutay Market | Canlı Finans Paneli</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { background-color: #0b0e14; color: #f8fafc; font-family: 'Inter', sans-serif; }
+        .navbar { background: #161b22; border-bottom: 2px solid #3b82f6; }
+        .price-card {
+            background: #161b22; border: 1px solid #30363d; border-radius: 15px;
+            padding: 20px; transition: 0.3s;
+        }
+        .price-card:hover { border-color: #3b82f6; background: #1c2128; }
+        .price-value { font-size: 1.8rem; font-weight: 800; color: #3fb950; }
+        .gold-value { color: #d29922; }
+        .table-dark { background-color: #161b22; --bs-table-bg: #161b22; border: 1px solid #30363d; }
+        .calc-box { background: linear-gradient(145deg, #1e293b, #0f172a); border-radius: 20px; padding: 30px; }
+        .form-control { background: #0b0e14; border: 1px solid #30363d; color: white; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar mb-4 py-3 shadow">
+    <div class="container d-flex justify-content-between">
+        <span class="navbar-brand fw-bold text-white fs-4"><i class="fa-solid fa-vault me-2 text-primary"></i>KUTAY<span class="text-primary">FINANCE</span></span>
+        <div id="last-update" class="badge bg-primary d-flex align-items-center">Veriler Yükleniyor...</div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="row g-3 mb-4 text-center">
+        <div class="col-md-4">
+            <div class="price-card shadow-sm">
+                <div class="text-secondary small fw-bold mb-1 uppercase">DOLAR (USD/TRY)</div>
+                <div class="price-value" id="usd-price">₺0.00</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="price-card shadow-sm">
+                <div class="text-secondary small fw-bold mb-1 uppercase">EURO (EUR/TRY)</div>
+                <div class="price-value text-info" id="eur-price">₺0.00</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="price-card shadow-sm">
+                <div class="text-secondary small fw-bold mb-1 uppercase">GRAM ALTIN (HAS)</div>
+                <div class="price-value gold-value" id="gold-price">₺0.00</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="card bg-dark border-secondary h-100 p-3">
+                <h5 class="mb-3"><i class="fa-solid fa-coins text-warning me-2"></i>Altın Piyasa Detayları</h5>
+                <table class="table table-dark table-hover mb-0">
+                    <thead>
+                        <tr class="text-secondary">
+                            <th>Cins</th>
+                            <th class="text-end">Satış Fiyatı</th>
+                        </tr>
+                    </thead>
+                    <tbody id="gold-table-body">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="calc-box h-100 shadow-lg border border-primary">
+                <h5 class="mb-4 text-center"><i class="fa-solid fa-calculator me-2"></i>Hızlı Yatırım Hesaplayıcı</h5>
+                <div class="mb-4">
+                    <label class="form-label small text-secondary">ELİNDEKİ TÜRK LİRASI (₺)</label>
+                    <input type="number" id="tlInput" class="form-control form-control-lg" placeholder="Miktar giriniz..." oninput="calculateAll()">
+                </div>
+                <div class="row g-2 text-center">
+                    <div class="col-6 mb-2">
+                        <div class="p-2 border border-secondary rounded">
+                            <div class="small text-secondary">Dolar Alabilirsin</div>
+                            <h5 id="calc-usd" class="mb-0 text-success">$0</h5>
+                        </div>
+                    </div>
+                    <div class="col-6 mb-2">
+                        <div class="p-2 border border-secondary rounded">
+                            <div class="small text-secondary">Euro Alabilirsin</div>
+                            <h5 id="calc-eur" class="mb-0 text-info">€0</h5>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="p-2 border border-warning rounded">
+                            <div class="small text-secondary">Has Altın Alabilirsin</div>
+                            <h4 id="calc-gold" class="mb-0 text-warning">0.00 gr</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5 justify-content-center">
+    <div class="col-lg-10">
+        <div class="card bg-dark border-info p-4 shadow-lg">
+            <h4 class="text-info mb-4"><i class="fa-solid fa-clock-rotate-left me-2"></i>Yatırım Zaman Makinesi</h4>
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="small text-secondary">Yatırım Tarihi</label>
+                    <input type="date" id="pastDate" class="form-control">
+                </div>
+                <div class="col-md-3">
+                    <label class="small text-secondary">Varlık Türü</label>
+                    <select id="assetType" class="form-select bg-black text-white border-secondary">
+                        <option value="USD">Dolar ($)</option>
+                        <option value="EUR">Euro (€)</option>
+                        <option value="ALTIN">Gram Altın (gr)</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="small text-secondary">Yatırılan TL Tutarı</label>
+                    <input type="number" id="investAmount" class="form-control" placeholder="Örn: 10000">
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button onclick="analyzePast()" class="btn btn-info w-100 fw-bold">ANALİZ ET</button>
+                </div>
+            </div>
+
+            <div id="analysisResult" class="mt-4 p-3 rounded bg-black d-none">
+                </div>
+        </div>
+    </div>
+</div>
+
+
+<footer class="text-center mt-5 p-4 text-secondary border-top border-secondary">
+    Kutay Sarikaya Professional Finance v2.0 | Veriler 30s'de bir güncellenir.
+</footer>
+
+<script>
+    let currentRates = {};
+
+    // 1. Verileri Backend'den Çek
+    async function updateDashboard() {
+        try {
+            const response = await fetch('/piyasa');
+            const data = await response.json();
+            currentRates = data;
+
+            // Ana Kartları Güncelle
+            document.getElementById('usd-price').innerText = '₺' + data.dolar.toFixed(2);
+            document.getElementById('eur-price').innerText = '₺' + data.euro.toFixed(2);
+            document.getElementById('gold-price').innerText = '₺' + data.gram_altin.toLocaleString('tr-TR');
+            document.getElementById('last-update').innerText = data.guncelleme;
+
+            // Altın Tablosunu Güncelle
+            const tableBody = document.getElementById('gold-table-body');
+            const goldItems = [
+                { name: 'Çeyrek Altın', val: data.ceyrek_altin },
+                { name: 'Yarım Altın', val: data.yarim_altin },
+                { name: 'Tam Altın', val: data.tam_altin },
+                { name: 'Cumhuriyet Altını', val: data.gram_altin * 7.02 } // Standart Cumhuriyet çarpanı
+            ];
+
+            tableBody.innerHTML = goldItems.map(item => `
+                <tr>
+                    <td class="py-3">${item.name}</td>
+                    <td class="text-end py-3 fw-bold text-warning">₺${item.val.toLocaleString('tr-TR')}</td>
+                </tr>
+            `).join('');
+
+            calculateAll(); // Fiyatlar gelince mevcut hesaplamayı yenile
+        } catch (e) {
+            console.error("Veri hatası:", e);
+        }
+    }
+
+
+    async function analyzePast() {
+    const date = document.getElementById('pastDate').value;
+    const type = document.getElementById('assetType').value;
+    const amount = document.getElementById('investAmount').value;
+    const resDiv = document.getElementById('analysisResult');
+
+    if(!date || !amount) { alert("Lütfen tarih ve miktar girin!"); return; }
+
+    // Backend'den o günkü kuru çek (Simülasyon)
+    const response = await fetch(`/gecmis-kur/${date}/${type}`);
+    const data = await response.json();
+    const eskiFiyat = data.eski_fiyat;
+    
+    // Bugünün fiyatını al
+    let bugunFiyat = (type === "USD") ? currentRates.dolar : 
+                     (type === "EUR") ? currentRates.euro : currentRates.gram_altin;
+
+    // Hesaplamalar
+    const miktar = amount / eskiFiyat; // O gün kaç adet alabildi
+    const bugunkuDeger = miktar * bugunFiyat;
+    const karZarar = bugunkuDeger - amount;
+    const oran = (karZarar / amount) * 100;
+
+    resDiv.classList.remove('d-none');
+    resDiv.innerHTML = `
+        <div class="row text-center">
+            <div class="col-md-4">
+                <p class="text-secondary mb-0">O Gün Alınabilen</p>
+                <h4 class="text-white">${miktar.toFixed(2)} ${type}</h4>
+            </div>
+            <div class="col-md-4">
+                <p class="text-secondary mb-0">Bugünkü Değeri</p>
+                <h4 class="text-white">₺${bugunkuDeger.toLocaleString('tr-TR')}</h4>
+            </div>
+            <div class="col-md-4">
+                <p class="text-secondary mb-0">Toplam Kar/Zarar</p>
+                <h4 class="${karZarar >= 0 ? 'text-success' : 'text-danger'}">
+                    ₺${karZarar.toLocaleString('tr-TR')} (%${oran.toFixed(1)})
+                </h4>
+            </div>
+        </div>
+        <p class="mt-3 small text-info text-center italic border-top border-secondary pt-2">
+            * ${date} tarihinde ₺${amount} ile ${type} alsaydınız, bugün paranız tam ₺${bugunkuDeger.toLocaleString()} olacaktı.
+        </p>
+    `;
+}
+
+
+    // 2. Hesaplama Mantığı
+    function calculateAll() {
+        const tl = document.getElementById('tlInput').value;
+        if (!tl || tl <= 0) return;
+
+        document.getElementById('calc-usd').innerText = '$' + (tl / currentRates.dolar).toFixed(2);
+        document.getElementById('calc-eur').innerText = '€' + (tl / currentRates.euro).toFixed(2);
+        document.getElementById('calc-gold').innerText = (tl / currentRates.gram_altin).toFixed(3) + ' gr';
+    }
+
+    // Başlatıcılar
+    updateDashboard();
+    setInterval(updateDashboard, 30000); // 30 Saniyede bir canlı güncelle
+</script>
+
+</body>
+</html>
